@@ -155,7 +155,7 @@ const handleCardClick = (cardId: string) => {
     <!-- Axis Labels -->
     <div class="mt-4 flex justify-between text-sm text-gray-600">
       <div class="flex-1 text-center">
-        <p class="font-semibold">← Less Urgent | More Urgent →</p>
+        <p class="font-semibold">← More Urgent | Less Urgent →</p>
       </div>
     </div>
     <div class="flex justify-between text-sm text-gray-600 mt-2">

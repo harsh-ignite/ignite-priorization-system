@@ -64,4 +64,7 @@ export const useCardStore = defineStore('card', () => {
     selectCard,
     clearSelection
   }
-})
+},
+  {
+    persist: true, // Enable persistence for this store
+  })
