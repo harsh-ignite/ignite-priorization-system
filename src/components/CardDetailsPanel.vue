@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useCardStore } from '../stores/cardStore'
+import DeleteCardAlert from './DeleteCardAlert.vue'
 
 const cardStore = useCardStore()
 
@@ -56,11 +57,21 @@ const handleSave = () => {
   }
 }
 
-const handleDelete = () => {
-  if (cardStore.selectedCard && confirm('Are you sure you want to delete this card?')) {
+const showDeleteAlert = ref(false)
+
+const handleDeleteConfirm = () => {
+  if (cardStore.selectedCard) {
     const cardId = cardStore.selectedCard.id
     cardStore.deleteCard(cardId)
   }
+}
+
+const handleDeleteCancel = () => {
+  showDeleteAlert.value = false
+}
+
+const handleDelete = () => {
+  showDeleteAlert.value = true
 }
 
 const handleCancel = () => {
@@ -232,12 +243,22 @@ const getQuadrant = (urgency: number, important: number) => {
         >
           Edit
         </button>
-        <button
-          @click="handleDelete"
-          class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm"
+        <DeleteCardAlert
+          v-model:open="showDeleteAlert"
+          title="Delete card?"
+          description="This will permanently delete this card. This action cannot be undone."
+          @confirm="handleDeleteConfirm"
+          @cancel="handleDeleteCancel"
         >
-          Delete
-        </button>
+          <template #trigger>
+            <button
+              @click="handleDelete"
+              class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm"
+            >
+              Delete
+            </button>
+          </template>
+        </DeleteCardAlert>
       </div>
       <div v-else class="flex gap-2">
         <button
