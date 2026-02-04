@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useCardStore } from '../stores/cardStore'
+import { useCardStore, calculateRICEScore } from '../stores/cardStore'
 import DeleteCardAlert from './DeleteCardAlert.vue'
 
 const cardStore = useCardStore()
@@ -10,7 +10,11 @@ const editForm = ref({
   urgency: 5,
   important: 5,
   effort: 5,
-  owner: ''
+  owner: '',
+  reach: 0,
+  impact: 1,
+  confidence: 50,
+  effortMonths: 1
 })
 
 const isEditing = ref(false)
@@ -23,7 +27,11 @@ watch(() => cardStore.selectedCard, (newCard) => {
       urgency: newCard.urgency,
       important: newCard.important,
       effort: newCard.effort,
-      owner: newCard.owner
+      owner: newCard.owner,
+      reach: newCard.reach,
+      impact: newCard.impact,
+      confidence: newCard.confidence,
+      effortMonths: newCard.effortMonths
     }
     isEditing.value = false
   }
@@ -51,7 +59,11 @@ const handleSave = () => {
       urgency: editForm.value.urgency,
       important: editForm.value.important,
       effort: editForm.value.effort,
-      owner: editForm.value.owner
+      owner: editForm.value.owner,
+      reach: editForm.value.reach,
+      impact: editForm.value.impact,
+      confidence: editForm.value.confidence,
+      effortMonths: editForm.value.effortMonths
     })
     isEditing.value = false
   }
@@ -81,7 +93,11 @@ const handleCancel = () => {
       urgency: cardStore.selectedCard.urgency,
       important: cardStore.selectedCard.important,
       effort: cardStore.selectedCard.effort,
-      owner: cardStore.selectedCard.owner
+      owner: cardStore.selectedCard.owner,
+      reach: cardStore.selectedCard.reach,
+      impact: cardStore.selectedCard.impact,
+      confidence: cardStore.selectedCard.confidence,
+      effortMonths: cardStore.selectedCard.effortMonths
     }
   }
   isEditing.value = false
@@ -160,6 +176,37 @@ const getQuadrant = (urgency: number, important: number) => {
           <p class="text-xs font-semibold text-gray-600 uppercase">Created</p>
           <p class="text-xs text-gray-600 mt-1">{{ new Date(cardStore.selectedCard.createdAt).toLocaleDateString() }}</p>
         </div>
+
+        <!-- RICE Framework Section -->
+        <div class="border-t pt-4 mt-4">
+          <h4 class="text-sm font-semibold text-gray-900 mb-3">RICE Score</h4>
+          
+          <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
+            <p class="text-xs font-semibold text-purple-600 uppercase">RICE Score</p>
+            <p class="text-3xl font-bold text-purple-700 mt-1">{{ calculateRICEScore(cardStore.selectedCard).toFixed(2) }}</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <p class="text-xs font-semibold text-gray-600 uppercase">Reach</p>
+              <p class="text-lg font-bold text-gray-900 mt-1">{{ cardStore.selectedCard.reach }}</p>
+              <p class="text-xs text-gray-600">leads</p>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-gray-600 uppercase">Impact</p>
+              <p class="text-lg font-bold text-gray-900 mt-1">{{ cardStore.selectedCard.impact }}</p>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-gray-600 uppercase">Confidence</p>
+              <p class="text-lg font-bold text-gray-900 mt-1">{{ cardStore.selectedCard.confidence }}%</p>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-gray-600 uppercase">Effort</p>
+              <p class="text-lg font-bold text-gray-900 mt-1">{{ cardStore.selectedCard.effortMonths }}</p>
+              <p class="text-xs text-gray-600">months</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Edit Mode -->
@@ -230,6 +277,83 @@ const getQuadrant = (urgency: number, important: number) => {
             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
           />
           <p v-if="errors.owner" class="text-red-500 text-xs mt-1">{{ errors.owner }}</p>
+        </div>
+
+        <!-- RICE Framework Section -->
+        <div class="border-t pt-4 mt-4">
+          <h4 class="text-sm font-semibold text-gray-900 mb-3">RICE Prioritization</h4>
+          
+          <!-- Reach -->
+          <div>
+            <label for="edit-reach" class="block text-sm font-medium text-gray-700 mb-1">
+              Reach (Customer Leads): {{ editForm.reach }}
+            </label>
+            <input
+              id="edit-reach"
+              v-model.number="editForm.reach"
+              type="number"
+              min="0"
+              placeholder="Number of customer leads"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+          </div>
+
+          <!-- Impact -->
+          <div class="mt-3">
+            <label for="edit-impact" class="block text-sm font-medium text-gray-700 mb-1">
+              Impact: {{ editForm.impact }}
+            </label>
+            <select
+              id="edit-impact"
+              v-model.number="editForm.impact"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+            >
+              <option value="3">3 - Massive Impact</option>
+              <option value="2">2 - High Impact</option>
+              <option value="1">1 - Medium Impact</option>
+              <option value="0.5">0.5 - Low Impact</option>
+              <option value="0.25">0.25 - Minimal Impact</option>
+            </select>
+          </div>
+
+          <!-- Confidence -->
+          <div class="mt-3">
+            <label for="edit-confidence" class="block text-sm font-medium text-gray-700 mb-1">
+              Confidence: {{ editForm.confidence }}% 
+              <span class="text-xs text-gray-600">
+                ({{ editForm.confidence <= 50 ? 'Low' : editForm.confidence <= 80 ? 'Medium' : 'High' }})
+              </span>
+            </label>
+            <input
+              id="edit-confidence"
+              v-model.number="editForm.confidence"
+              type="range"
+              min="0"
+              max="100"
+              class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            />
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          <!-- Effort (Person-Months) -->
+          <div class="mt-3">
+            <label for="edit-effortMonths" class="block text-sm font-medium text-gray-700 mb-1">
+              Effort (Person-Months): {{ editForm.effortMonths }}
+            </label>
+            <input
+              id="edit-effortMonths"
+              v-model.number="editForm.effortMonths"
+              type="number"
+              min="0.1"
+              step="0.1"
+              placeholder="Number of person-months"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+          </div>
         </div>
       </form>
     </div>

@@ -9,6 +9,16 @@ export interface Card {
   effort: number // 1-10
   owner: string
   createdAt: Date
+  // RICE Framework fields
+  reach: number // number of customer leads
+  impact: number // 3, 2, 1, 0.5, 0.25
+  confidence: number // 0-100 percentage
+  effortMonths: number // person-months
+}
+export function calculateRICEScore(card: Card): number {
+  // Formula: (Reach * Impact * Confidence) / Effort
+  if (card.effortMonths === 0) return 0
+  return (card.reach * card.impact * (card.confidence / 100)) / card.effortMonths
 }
 
 export const useCardStore = defineStore('card', () => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCardStore } from '../stores/cardStore'
+import { useCardStore, calculateRICEScore } from '../stores/cardStore'
 import type { Card } from '../stores/cardStore'
 
 const cardStore = useCardStore()
@@ -64,8 +64,15 @@ const handleCardClick = (cardId: string) => {
               cardStore.selectedCardId === card.id ? 'ring-2 ring-blue-500 shadow-lg' : ''
             ]"
           >
-            <p class="text-xs font-semibold text-gray-900 truncate">{{ card.title }}</p>
-            <p class="text-xs text-gray-600">{{ card.owner }}</p>
+            <div class="flex justify-between items-start gap-1">
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-900 truncate">{{ card.title }}</p>
+                <p class="text-xs text-gray-600">{{ card.owner }}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="text-xs font-bold text-purple-700">{{ calculateRICEScore(card).toFixed(1) }}</p>
+              </div>
+            </div>
           </div>
           <div v-if="getQuadrantCards('Do First').length === 0" class="text-xs text-gray-400 text-center py-4">
             No tasks
@@ -90,8 +97,15 @@ const handleCardClick = (cardId: string) => {
               cardStore.selectedCardId === card.id ? 'ring-2 ring-blue-500 shadow-lg' : ''
             ]"
           >
-            <p class="text-xs font-semibold text-gray-900 truncate">{{ card.title }}</p>
-            <p class="text-xs text-gray-600">{{ card.owner }}</p>
+            <div class="flex justify-between items-start gap-1">
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-900 truncate">{{ card.title }}</p>
+                <p class="text-xs text-gray-600">{{ card.owner }}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="text-xs font-bold text-purple-700">{{ calculateRICEScore(card).toFixed(1) }}</p>
+              </div>
+            </div>
           </div>
           <div v-if="getQuadrantCards('Schedule').length === 0" class="text-xs text-gray-400 text-center py-4">
             No tasks
@@ -116,8 +130,15 @@ const handleCardClick = (cardId: string) => {
               cardStore.selectedCardId === card.id ? 'ring-2 ring-blue-500 shadow-lg' : ''
             ]"
           >
-            <p class="text-xs font-semibold text-gray-900 truncate">{{ card.title }}</p>
-            <p class="text-xs text-gray-600">{{ card.owner }}</p>
+            <div class="flex justify-between items-start gap-1">
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-900 truncate">{{ card.title }}</p>
+                <p class="text-xs text-gray-600">{{ card.owner }}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="text-xs font-bold text-purple-700">{{ calculateRICEScore(card).toFixed(1) }}</p>
+              </div>
+            </div>
           </div>
           <div v-if="getQuadrantCards('Delegate').length === 0" class="text-xs text-gray-400 text-center py-4">
             No tasks
@@ -142,8 +163,15 @@ const handleCardClick = (cardId: string) => {
               cardStore.selectedCardId === card.id ? 'ring-2 ring-blue-500 shadow-lg' : ''
             ]"
           >
-            <p class="text-xs font-semibold text-gray-900 truncate">{{ card.title }}</p>
-            <p class="text-xs text-gray-600">{{ card.owner }}</p>
+            <div class="flex justify-between items-start gap-1">
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-900 truncate">{{ card.title }}</p>
+                <p class="text-xs text-gray-600">{{ card.owner }}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="text-xs font-bold text-purple-700">{{ calculateRICEScore(card).toFixed(1) }}</p>
+              </div>
+            </div>
           </div>
           <div v-if="getQuadrantCards('Eliminate').length === 0" class="text-xs text-gray-400 text-center py-4">
             No tasks

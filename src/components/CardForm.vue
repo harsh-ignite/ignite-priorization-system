@@ -9,7 +9,11 @@ const form = ref({
   urgency: 5,
   important: 5,
   effort: 5,
-  owner: ''
+  owner: '',
+  reach: 0,
+  impact: 1,
+  confidence: 50,
+  effortMonths: 1
 })
 
 const errors = ref<Record<string, string>>({})
@@ -35,7 +39,11 @@ const handleSubmit = () => {
     urgency: form.value.urgency,
     important: form.value.important,
     effort: form.value.effort,
-    owner: form.value.owner
+    owner: form.value.owner,
+    reach: form.value.reach,
+    impact: form.value.impact,
+    confidence: form.value.confidence,
+    effortMonths: form.value.effortMonths
   })
   
   // Reset form
@@ -44,7 +52,11 @@ const handleSubmit = () => {
     urgency: 5,
     important: 5,
     effort: 5,
-    owner: ''
+    owner: '',
+    reach: 0,
+    impact: 1,
+    confidence: 50,
+    effortMonths: 1
   }
 }
 
@@ -147,6 +159,83 @@ const getImportanceLabel = (value: number) => {
           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
         />
         <p v-if="errors.owner" class="text-red-500 text-xs mt-1">{{ errors.owner }}</p>
+      </div>
+
+      <!-- RICE Framework Section -->
+      <div class="border-t pt-4 mt-4">
+        <h4 class="text-sm font-semibold text-gray-900 mb-3">RICE Prioritization</h4>
+        
+        <!-- Reach -->
+        <div>
+          <label for="reach" class="block text-sm font-medium text-gray-700 mb-1">
+            Reach (Customer Leads): {{ form.reach }}
+          </label>
+          <input
+            id="reach"
+            v-model.number="form.reach"
+            type="number"
+            min="0"
+            placeholder="Number of customer leads"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+          />
+        </div>
+
+        <!-- Impact -->
+        <div class="mt-3">
+          <label for="impact" class="block text-sm font-medium text-gray-700 mb-1">
+            Impact: {{ form.impact }}
+          </label>
+          <select
+            id="impact"
+            v-model.number="form.impact"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+          >
+            <option value="3">3 - Massive Impact</option>
+            <option value="2">2 - High Impact</option>
+            <option value="1">1 - Medium Impact</option>
+            <option value="0.5">0.5 - Low Impact</option>
+            <option value="0.25">0.25 - Minimal Impact</option>
+          </select>
+        </div>
+
+        <!-- Confidence -->
+        <div class="mt-3">
+          <label for="confidence" class="block text-sm font-medium text-gray-700 mb-1">
+            Confidence: {{ form.confidence }}% 
+            <span class="text-xs text-gray-600">
+              ({{ form.confidence <= 50 ? 'Low' : form.confidence <= 80 ? 'Medium' : 'High' }})
+            </span>
+          </label>
+          <input
+            id="confidence"
+            v-model.number="form.confidence"
+            type="range"
+            min="0"
+            max="100"
+            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+          />
+          <div class="flex justify-between text-xs text-gray-500 mt-1">
+            <span>0%</span>
+            <span>50%</span>
+            <span>100%</span>
+          </div>
+        </div>
+
+        <!-- Effort (Person-Months) -->
+        <div class="mt-3">
+          <label for="effortMonths" class="block text-sm font-medium text-gray-700 mb-1">
+            Effort (Person-Months): {{ form.effortMonths }}
+          </label>
+          <input
+            id="effortMonths"
+            v-model.number="form.effortMonths"
+            type="number"
+            min="0.1"
+            step="0.1"
+            placeholder="Number of person-months"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+          />
+        </div>
       </div>
 
       <!-- Submit Button -->
