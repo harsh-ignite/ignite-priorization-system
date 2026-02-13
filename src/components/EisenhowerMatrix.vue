@@ -44,9 +44,30 @@ const handleCardClick = (cardId: string) => {
   <div class="flex-1 flex flex-col h-full bg-white p-6">
     <!-- Title -->
     <h2 class="text-2xl font-bold text-gray-900 mb-6">Eisenhower Matrix</h2>
-    
+
+    <!-- Loading State -->
+    <div v-if="cardStore.isLoading" class="flex-1 flex items-center justify-center">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p class="text-gray-600">Loading tasks...</p>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="cardStore.error" class="flex-1 flex items-center justify-center">
+      <div class="text-center">
+        <p class="text-red-600 mb-4">{{ cardStore.error }}</p>
+        <button
+          @click="cardStore.fetchCards()"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+
     <!-- Matrix Grid -->
-    <div class="flex-1 grid grid-cols-2 gap-4 min-h-0">
+    <div v-else class="flex-1 grid grid-cols-2 gap-4 min-h-0">
       <!-- Do First (Important & Urgent) -->
       <div :class="['border-2 rounded-lg p-4 overflow-hidden flex flex-col', quadrants[0]?.color, quadrants[0]?.borderColor]">
         <h3 :class="['text-lg font-bold mb-3', quadrants[0]?.textColor]">

@@ -1,12 +1,20 @@
 <script setup lang="ts">
+import { useAuthStore } from './stores/authStore'
+import LoginDialog from './components/LoginDialog.vue'
 import Toolbar from './components/Toolbar.vue'
 import CardForm from './components/CardForm.vue'
 import EisenhowerMatrix from './components/EisenhowerMatrix.vue'
 import CardDetailsPanel from './components/CardDetailsPanel.vue'
+
+const authStore = useAuthStore()
 </script>
 
 <template>
-  <div class="h-screen flex flex-col bg-gray-100">
+  <!-- Login Dialog -->
+  <LoginDialog />
+
+  <!-- Main App (only shown when authenticated) -->
+  <div v-if="authStore.isAuthenticated" class="h-screen flex flex-col bg-gray-100">
     <!-- Toolbar -->
     <Toolbar />
 

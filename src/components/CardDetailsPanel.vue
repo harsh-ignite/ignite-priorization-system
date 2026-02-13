@@ -9,7 +9,7 @@ const editForm = ref({
   title: '',
   urgency: 5,
   important: 5,
-  effort: 5,
+  effort: '',
   owner: '',
   reach: 0,
   impact: 1,
@@ -18,6 +18,8 @@ const editForm = ref({
 })
 
 const isEditing = ref(false)
+const isSaving = ref(false)
+const isDeleting = ref(false)
 const errors = ref<Record<string, string>>({})
 
 watch(() => cardStore.selectedCard, (newCard) => {
@@ -39,42 +41,62 @@ watch(() => cardStore.selectedCard, (newCard) => {
 
 const validateForm = () => {
   errors.value = {}
-  
+
   if (!editForm.value.title.trim()) {
     errors.value.title = 'Title is required'
   }
   if (!editForm.value.owner.trim()) {
     errors.value.owner = 'Owner is required'
   }
-  
+  if (!editForm.value.effort.trim()) {
+    errors.value.effort = 'Effort is required'
+  }
+
   return Object.keys(errors.value).length === 0
 }
 
-const handleSave = () => {
+const handleSave = async () => {
   if (!validateForm()) return
-  
-  if (cardStore.selectedCard) {
-    cardStore.updateCard(cardStore.selectedCard.id, {
-      title: editForm.value.title,
-      urgency: editForm.value.urgency,
-      important: editForm.value.important,
-      effort: editForm.value.effort,
-      owner: editForm.value.owner,
-      reach: editForm.value.reach,
-      impact: editForm.value.impact,
-      confidence: editForm.value.confidence,
-      effortMonths: editForm.value.effortMonths
-    })
-    isEditing.value = false
+
+  isSaving.value = true
+
+  try {
+    if (cardStore.selectedCard) {
+      await cardStore.updateCard(cardStore.selectedCard.id, {
+        title: editForm.value.title,
+        urgency: editForm.value.urgency,
+        important: editForm.value.important,
+        effort: editForm.value.effort,
+        owner: editForm.value.owner,
+        reach: editForm.value.reach,
+        impact: editForm.value.impact,
+        confidence: editForm.value.confidence,
+        effortMonths: editForm.value.effortMonths
+      })
+      isEditing.value = false
+    }
+  } catch (err) {
+    console.error('Failed to save card:', err)
+  } finally {
+    isSaving.value = false
   }
 }
 
 const showDeleteAlert = ref(false)
 
-const handleDeleteConfirm = () => {
+const handleDeleteConfirm = async () => {
   if (cardStore.selectedCard) {
-    const cardId = cardStore.selectedCard.id
-    cardStore.deleteCard(cardId)
+    isDeleting.value = true
+
+    try {
+      const cardId = cardStore.selectedCard.id
+      await cardStore.deleteCard(cardId)
+      showDeleteAlert.value = false
+    } catch (err) {
+      console.error('Failed to delete card:', err)
+    } finally {
+      isDeleting.value = false
+    }
   }
 }
 
@@ -254,16 +276,16 @@ const getQuadrant = (urgency: number, important: number) => {
 
         <div>
           <label for="edit-effort" class="block text-sm font-medium text-gray-700 mb-1">
-            Effort: {{ editForm.effort }}
+            Effort
           </label>
           <input
             id="edit-effort"
-            v-model.number="editForm.effort"
-            type="range"
-            min="1"
-            max="10"
-            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            v-model="editForm.effort"
+            type="text"
+            placeholder="e.g., 2 hours, 3 days, 1 week"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
           />
+          <p v-if="errors.effort" class="text-red-500 text-xs mt-1">{{ errors.effort }}</p>
         </div>
 
         <div>
@@ -363,7 +385,8 @@ const getQuadrant = (urgency: number, important: number) => {
       <div v-if="!isEditing" class="flex gap-2">
         <button
           @click="isEditing = true"
-          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm"
+          :disabled="isDeleting"
+          class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm"
         >
           Edit
         </button>
@@ -377,9 +400,10 @@ const getQuadrant = (urgency: number, important: number) => {
           <template #trigger>
             <button
               @click="handleDelete"
-              class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm"
+              :disabled="isDeleting"
+              class="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm"
             >
-              Delete
+              {{ isDeleting ? 'Deleting...' : 'Delete' }}
             </button>
           </template>
         </DeleteCardAlert>
@@ -387,13 +411,15 @@ const getQuadrant = (urgency: number, important: number) => {
       <div v-else class="flex gap-2">
         <button
           @click="handleSave"
-          class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm"
+          :disabled="isSaving"
+          class="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm"
         >
-          Save
+          {{ isSaving ? 'Saving...' : 'Save' }}
         </button>
         <button
           @click="handleCancel"
-          class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm"
+          :disabled="isSaving"
+          class="flex-1 bg-gray-400 hover:bg-gray-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 text-sm"
         >
           Cancel
         </button>

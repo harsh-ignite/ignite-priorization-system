@@ -8,7 +8,7 @@ const form = ref({
   title: '',
   urgency: 5,
   important: 5,
-  effort: 5,
+  effort: '',
   owner: '',
   reach: 0,
   impact: 1,
@@ -17,46 +17,59 @@ const form = ref({
 })
 
 const errors = ref<Record<string, string>>({})
+const isSubmitting = ref(false)
 
 const validateForm = () => {
   errors.value = {}
-  
+
   if (!form.value.title.trim()) {
     errors.value.title = 'Title is required'
   }
   if (!form.value.owner.trim()) {
     errors.value.owner = 'Owner is required'
   }
-  
+  if (!form.value.effort.trim()) {
+    errors.value.effort = 'Effort is required'
+  }
+
   return Object.keys(errors.value).length === 0
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!validateForm()) return
-  
-  cardStore.addCard({
-    title: form.value.title,
-    urgency: form.value.urgency,
-    important: form.value.important,
-    effort: form.value.effort,
-    owner: form.value.owner,
-    reach: form.value.reach,
-    impact: form.value.impact,
-    confidence: form.value.confidence,
-    effortMonths: form.value.effortMonths
-  })
-  
-  // Reset form
-  form.value = {
-    title: '',
-    urgency: 5,
-    important: 5,
-    effort: 5,
-    owner: '',
-    reach: 0,
-    impact: 1,
-    confidence: 50,
-    effortMonths: 1
+
+  isSubmitting.value = true
+
+  try {
+    await cardStore.addCard({
+      title: form.value.title,
+      urgency: form.value.urgency,
+      important: form.value.important,
+      effort: form.value.effort,
+      owner: form.value.owner,
+      reach: form.value.reach,
+      impact: form.value.impact,
+      confidence: form.value.confidence,
+      effortMonths: form.value.effortMonths
+    })
+
+    // Reset form on success
+    form.value = {
+      title: '',
+      urgency: 5,
+      important: 5,
+      effort: '',
+      owner: '',
+      reach: 0,
+      impact: 1,
+      confidence: 50,
+      effortMonths: 1
+    }
+  } catch (err) {
+    // Error handling is done in the store
+    console.error('Failed to add card:', err)
+  } finally {
+    isSubmitting.value = false
   }
 }
 
@@ -130,20 +143,16 @@ const getImportanceLabel = (value: number) => {
       <!-- Effort -->
       <div>
         <label for="effort" class="block text-sm font-medium text-gray-700 mb-1">
-          Effort: {{ form.effort }}
+          Effort
         </label>
         <input
           id="effort"
-          v-model.number="form.effort"
-          type="range"
-          min="1"
-          max="10"
-          class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+          v-model="form.effort"
+          type="text"
+          placeholder="e.g., 2 hours, 3 days, 1 week"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
         />
-        <div class="flex justify-between text-xs text-gray-500 mt-1">
-          <span>Low (1)</span>
-          <span>High (10)</span>
-        </div>
+        <p v-if="errors.effort" class="text-red-500 text-xs mt-1">{{ errors.effort }}</p>
       </div>
 
       <!-- Owner -->
@@ -241,9 +250,10 @@ const getImportanceLabel = (value: number) => {
       <!-- Submit Button -->
       <button
         type="submit"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+        :disabled="isSubmitting"
+        class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
       >
-        Add Card
+        {{ isSubmitting ? 'Adding...' : 'Add Card' }}
       </button>
     </form>
   </div>
